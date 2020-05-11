@@ -12,6 +12,18 @@ function errorMessageResponse(message, status, res) {
   return res.status(status).end();
 }
 
+async function checkIfOtherSport({ id }, res, prevError) {
+  try {
+    const result = await Sports.findById(id);
+    if(result) {
+      return errorMessageResponse('It exists another sport with that id', 400, res);
+    }
+    return errorMessageResponse(prevError, 500, res);
+  } catch (err) {
+    return errorMessageResponse(err, 500, res);
+  }
+}
+
 app.post('/sports/addSport/:sportId', jsonParser, async ({ body, params }, res) => {
   const fields = ['name', 'num_players', 'id'];
 
@@ -31,8 +43,7 @@ app.post('/sports/addSport/:sportId', jsonParser, async ({ body, params }, res) 
     const newSport = await Sports.createSport(body);
     return res.status(201).json(newSport);
   } catch (err) {
-    console.log(err);
-    return errorMessageResponse(err, 500, res);
+    return checkIfOtherSport(body, res, err);
   }
 
 });

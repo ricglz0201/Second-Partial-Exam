@@ -25,5 +25,12 @@ module.exports = {
     } catch (error) {
       throw Error(error);
     }
+  },
+  findById: async (id) => {
+    try {
+      return await sportsModel.where({id});
+    } catch (err) {
+      throw Error(err);
+    }
   }
 };
