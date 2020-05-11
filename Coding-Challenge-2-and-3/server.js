@@ -3,6 +3,7 @@ const express = require( 'express' );
 const jsonParser = bodyParser.json();
 const mongoose = require( 'mongoose' );
 const { DATABASE_URL, PORT } = require( './config' );
+const Sports = require('./models/sport-model')
 
 const app = express();
 
@@ -11,7 +12,7 @@ function errorMessageResponse(message, status, res) {
   return res.status(status).end();
 }
 
-app.post('/sports/addSport/:sportId', jsonParser, ({ body, params }, res) => {
+app.post('/sports/addSport/:sportId', jsonParser, async ({ body, params }, res) => {
   const fields = ['name', 'num_players', 'id'];
 
   for(let i = 0; i < fields.length; i++) {
@@ -26,7 +27,14 @@ app.post('/sports/addSport/:sportId', jsonParser, ({ body, params }, res) => {
     return errorMessageResponse('Id sent as param and as body does not match', 409, res);
   }
 
-  res.status(201).json(body);
+  try {
+    const newSport = await Sports.createSport(body);
+    return res.status(201).json(newSport);
+  } catch (err) {
+    console.log(err);
+    return errorMessageResponse(err, 500, res);
+  }
+
 });
 
 app.listen( PORT, () => {
